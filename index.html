@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css' rel='stylesheet' />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="map"></div>
+
+  <script type="text/javascript">
+let json;
+
+const url =
+  "https://rambo-test.carto.com:443/api/v2/sql?format=GeoJson&q=select * from public.mnmappluto ";
+
+fetch(url)
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(data) {
+    json = data;
+    //.features[0].filter(proccessArray(data));
+    console.log(json);
+  });
+
+mapboxgl.accessToken =
+  "pk.eyJ1IjoibHVwZWFzZXJiYW4iLCJhIjoiY2owaGNsMjZyMDJ5eDJxcDVleWE2a3BjdCJ9.fMYQbhKexTYmOygHsUSUEw";
+
+var map = new mapboxgl.Map({
+  container: "map", // container id
+  style: "mapbox://styles/lupeaserban/cjfbyjjtv04362rpavlr7edsx", // stylesheet location
+  center: [-73.9874267578125, 40.753499070431374], // starting position [lng, lat]
+  zoom: 10,
+  maxBounds: [
+    [-74.48593139648438, 40.49395938772784],
+    [-73.48480224609375, 41.221018745822505]
+  ],
+  bearing: 10 // starting zoom
+});
+
+map.on("load", function() {
+  map.addSource("carto_data", {
+    type: "geojson",
+    data: json
+  });
+
+  var layers = map.getStyle().layers;
+  // Find the index of the first symbol layer in the map style
+  var firstSymbolId;
+  for (var i = 0; i < layers.length; i++) {
+    if (layers[i].type === "symbol") {
+      firstSymbolId = layers[i].id;
+      break;
+    }
+  }
+
+  map.addLayer(
+    {
+      id: "carto",
+      type: "fill",
+      source: "carto_data",
+      paint: {
+        "fill-color": ["rgb", 0, ["-", 2018, ["get", "yearbuilt"]], 255],
+        "fill-opacity": 0.9
+      },
+      filter: ["!=", "yearbuilt", 0]
+    },
+    firstSymbolId
+  );
+});
+
+map.on("click", "carto", function(e) {
+  var coordinates = e.features[0].geometry.coordinates[0][1];
+  var yearbuilt = e.features[0].properties.yearbuilt;
+  var address = e.features[0].properties.address;
+  var owner = e.features[0].properties.ownername;
+
+  new mapboxgl.Popup({
+    anchor: "right"
+  })
+    .setLngLat(coordinates)
+    .setHTML(
+      "<h3>Year built: </h3>" +
+        yearbuilt +
+        "<h3>Address: </h3>" +
+        address +
+        "<h3>Owner: </h3>" +
+        owner
+    )
+    .addTo(map);
+});
+
+// Change the cursor to a pointer when the mouse is over the places layer.
+map.on("mouseenter", "carto", function() {
+  map.getCanvas().style.cursor = "pointer";
+});
+
+// Change it back to a pointer when it leaves.
+map.on("mouseleave", "carto", function() {
+  map.getCanvas().style.cursor = "";
+});
+</script>
+</body>
+
+
+
+</html>

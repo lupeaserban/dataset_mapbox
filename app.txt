@@ -1,0 +1,36 @@
+// used node
+
+
+var http = require('http');
+var request = require("request");
+var fs = require("fs")
+var json = [];
+
+request('https://rambo-test.carto.com:443/api/v2/sql?format=GeoJson&q=select * from public.mnmappluto LIMIT 5',
+  function (error, response, body) {
+    console.log('error:', error); // Print the error if one occurred
+    console.log('statusCode:', response && response.statusCode);
+    json = JSON.parse(body).features;
+    render();
+  }).pipe(fs.createWriteStream('features.json'));
+
+
+
+
+
+// package.json
+
+  {
+    "name": "carto_dataset",
+    "version": "1.0.0",
+    "description": "dataset rendering",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Serban Lupea",
+    "license": "ISC",
+    "dependencies": {
+      "request": "^2.86.0"
+    }
+  }

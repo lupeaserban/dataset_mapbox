@@ -7,6 +7,10 @@
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css' rel='stylesheet' />
   <style>
+    .mapboxgl-Popup {
+
+    }
+
     body {
       margin: 0;
       padding: 0;
@@ -29,7 +33,7 @@
 let json;
 
 const url =
-  "https://rambo-test.carto.com:443/api/v2/sql?format=GeoJson&q=select * from public.mnmappluto ";
+  "https://cdn.rawgit.com/lupeaserban/nyc_yearbuilt/5adbbd21/final.geojson";
 
 fetch(url)
   .then(function(response) {

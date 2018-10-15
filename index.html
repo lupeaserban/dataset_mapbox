@@ -62,7 +62,10 @@ map.on("load", function() {
     data: json
   });
 
-  if (map.isSourceLoaded) {
+  if (map.loaded() && map.isSourceLoaded("carto_data")) {
+    return;
+  }
+  {
     var layers = map.getStyle().layers;
     // Find the index of the first symbol layer in the map style
     var firstSymbolId;

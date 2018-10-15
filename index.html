@@ -6,23 +6,11 @@
   <title></title>
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css' rel='stylesheet' />
-  <style>
-    .mapboxgl-Popup {
-    }
-    body {
-      margin: 0;
-      padding: 0;
-    }
-    #map {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 100%;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="map"></div>
+  <div id="lds-hourglass"></div>
   <script type="text/javascript">
 mapboxgl.accessToken =
   "pk.eyJ1IjoibHVwZWFzZXJiYW4iLCJhIjoiY2owaGNsMjZyMDJ5eDJxcDVleWE2a3BjdCJ9.fMYQbhKexTYmOygHsUSUEw";
@@ -30,16 +18,25 @@ const url =
   "https://cdn.rawgit.com/lupeaserban/nyc_yearbuilt/5adbbd21/final.geojson";
 
 let json;
-
-fetch(url)
-  .then(function(response) {
-    return response.json();
+function getData() {
+  fetch(url, {
+    method: "GET"
   })
-  .then(function(data) {
-    json = data;
-    //.features[0].filter(proccessArray(data));
-    console.log(json);
-  });
+    .then(function(response) {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error("Network response was not ok.");
+    })
+    .then(function(data) {
+      json = data;
+      //.features[0].filter(proccessArray(data));
+      console.log(json);
+    })
+    .catch(error => console.error(error));
+}
+
+getData();
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoibHVwZWFzZXJiYW4iLCJhIjoiY2owaGNsMjZyMDJ5eDJxcDVleWE2a3BjdCJ9.fMYQbhKexTYmOygHsUSUEw";
@@ -64,10 +61,12 @@ map.on("load", function() {
 
   if (map.loaded() && map.isSourceLoaded("carto_data")) {
     return;
-  }
-  {
-    var layers = map.getStyle().layers;
+  } else {
+    // stop the loadingDiv from rendering
+    var loadingDiv = document.getElementById("lds-hourglass");
+    loadingDiv.style.display = "none";
     // Find the index of the first symbol layer in the map style
+    var layers = map.getStyle().layers;
     var firstSymbolId;
     for (var i = 0; i < layers.length; i++) {
       if (layers[i].type === "symbol") {

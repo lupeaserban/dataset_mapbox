@@ -8,14 +8,11 @@
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css' rel='stylesheet' />
   <style>
     .mapboxgl-Popup {
-
     }
-
     body {
       margin: 0;
       padding: 0;
     }
-
     #map {
       position: absolute;
       top: 0;
@@ -24,16 +21,15 @@
     }
   </style>
 </head>
-
 <body>
-
   <div id="map"></div>
-
   <script type="text/javascript">
-let json;
-
+mapboxgl.accessToken =
+  "pk.eyJ1IjoibHVwZWFzZXJiYW4iLCJhIjoiY2owaGNsMjZyMDJ5eDJxcDVleWE2a3BjdCJ9.fMYQbhKexTYmOygHsUSUEw";
 const url =
   "https://cdn.rawgit.com/lupeaserban/nyc_yearbuilt/5adbbd21/final.geojson";
+
+let json;
 
 fetch(url)
   .then(function(response) {
@@ -66,29 +62,31 @@ map.on("load", function() {
     data: json
   });
 
-  var layers = map.getStyle().layers;
-  // Find the index of the first symbol layer in the map style
-  var firstSymbolId;
-  for (var i = 0; i < layers.length; i++) {
-    if (layers[i].type === "symbol") {
-      firstSymbolId = layers[i].id;
-      break;
+  if (map.isSourceLoaded) {
+    var layers = map.getStyle().layers;
+    // Find the index of the first symbol layer in the map style
+    var firstSymbolId;
+    for (var i = 0; i < layers.length; i++) {
+      if (layers[i].type === "symbol") {
+        firstSymbolId = layers[i].id;
+        break;
+      }
     }
-  }
 
-  map.addLayer(
-    {
-      id: "carto",
-      type: "fill",
-      source: "carto_data",
-      paint: {
-        "fill-color": ["rgb", 0, ["-", 2018, ["get", "yearbuilt"]], 255],
-        "fill-opacity": 0.9
+    map.addLayer(
+      {
+        id: "carto",
+        type: "fill",
+        source: "carto_data",
+        paint: {
+          "fill-color": ["rgb", 0, ["-", 2018, ["get", "yearbuilt"]], 255],
+          "fill-opacity": 0.9
+        },
+        filter: ["!=", "yearbuilt", 0]
       },
-      filter: ["!=", "yearbuilt", 0]
-    },
-    firstSymbolId
-  );
+      firstSymbolId
+    );
+  }
 });
 
 map.on("click", "carto", function(e) {

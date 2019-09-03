@@ -8,120 +8,131 @@
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css' rel='stylesheet' />
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div id="map"></div>
   <div id="lds-hourglass"></div>
+  <div class='session' id='sliderbar'>
+    <h2>Year <label id='active-year'>1800</label></h2>
+    <input id='slider' class='row' type='range' min='1800' max='2019' step='1' value='1800' />
+  </div>
   <script type="text/javascript">
-mapboxgl.accessToken =
-  "pk.eyJ1IjoibHVwZWFzZXJiYW4iLCJhIjoiY2owaGNsMjZyMDJ5eDJxcDVleWE2a3BjdCJ9.fMYQbhKexTYmOygHsUSUEw";
-const url =
-  "https://cdn.rawgit.com/lupeaserban/nyc_yearbuilt/5adbbd21/final.geojson";
+    mapboxgl.accessToken =
+      "pk.eyJ1IjoibHVwZWFzZXJiYW4iLCJhIjoiY2owaGNsMjZyMDJ5eDJxcDVleWE2a3BjdCJ9.fMYQbhKexTYmOygHsUSUEw";
+    const url =
+      "https://cdn.rawgit.com/lupeaserban/nyc_yearbuilt/5adbbd21/final.geojson";
 
-let json;
-function getData() {
-  fetch(url, {
-    method: "GET"
-  })
-    .then(function(response) {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error("Network response was not ok.");
-    })
-    .then(function(data) {
-      json = data;
-      //.features[0].filter(proccessArray(data));
-      console.log(json);
-    })
-    .catch(error => console.error(error));
-}
-
-getData();
-
-mapboxgl.accessToken =
-  "pk.eyJ1IjoibHVwZWFzZXJiYW4iLCJhIjoiY2owaGNsMjZyMDJ5eDJxcDVleWE2a3BjdCJ9.fMYQbhKexTYmOygHsUSUEw";
-
-var map = new mapboxgl.Map({
-  container: "map", // container id
-  style: "mapbox://styles/lupeaserban/cjfbyjjtv04362rpavlr7edsx", // stylesheet location
-  center: [-73.9874267578125, 40.753499070431374], // starting position [lng, lat]
-  zoom: 10,
-  maxBounds: [
-    [-74.48593139648438, 40.49395938772784],
-    [-73.48480224609375, 41.221018745822505]
-  ],
-  bearing: 10 // starting zoom
-});
-
-map.on("load", function() {
-  map.addSource("carto_data", {
-    type: "geojson",
-    data: json
-  });
-
-  if (map.loaded() && map.isSourceLoaded("carto_data")) {
-    return;
-  } else {
-    // stop the loadingDiv from rendering
-    var loadingDiv = document.getElementById("lds-hourglass");
-    loadingDiv.style.display = "none";
-    // Find the index of the first symbol layer in the map style
-    var layers = map.getStyle().layers;
-    var firstSymbolId;
-    for (var i = 0; i < layers.length; i++) {
-      if (layers[i].type === "symbol") {
-        firstSymbolId = layers[i].id;
-        break;
-      }
+    let json;
+    function getData() {
+      fetch(url, {
+        method: "GET"
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error("Network response was not ok.");
+        })
+        .then(data => {
+          json = data;
+          //.features[0].filter(proccessArray(data));
+          console.log(json);
+        })
+        .catch(error => console.error(error));
     }
 
-    map.addLayer(
-      {
-        id: "carto",
-        type: "fill",
-        source: "carto_data",
-        paint: {
-          "fill-color": ["rgb", 0, ["-", 2018, ["get", "yearbuilt"]], 255],
-          "fill-opacity": 0.9
-        },
-        filter: ["!=", "yearbuilt", 0]
-      },
-      firstSymbolId
-    );
-  }
-});
+    getData();
 
-map.on("click", "carto", function(e) {
-  var coordinates = e.features[0].geometry.coordinates[0][1];
-  var yearbuilt = e.features[0].properties.yearbuilt;
-  var address = e.features[0].properties.address;
-  var owner = e.features[0].properties.ownername;
+    mapboxgl.accessToken =
+      "pk.eyJ1IjoibHVwZWFzZXJiYW4iLCJhIjoiY2owaGNsMjZyMDJ5eDJxcDVleWE2a3BjdCJ9.fMYQbhKexTYmOygHsUSUEw";
 
-  new mapboxgl.Popup({
-    anchor: "right"
-  })
-    .setLngLat(coordinates)
-    .setHTML(
-      "<h3>Year built: </h3>" +
-        yearbuilt +
-        "<h3>Address: </h3>" +
-        address +
-        "<h3>Owner: </h3>" +
-        owner
-    )
-    .addTo(map);
-});
+    var map = new mapboxgl.Map({
+      container: "map", // container id
+      style: "mapbox://styles/lupeaserban/cjfbyjjtv04362rpavlr7edsx", // stylesheet location
+      center: [-73.9874267578125, 40.753499070431374], // starting position [lng, lat]
+      zoom: 10,
+      maxBounds: [
+        [-74.48593139648438, 40.49395938772784],
+        [-73.48480224609375, 41.221018745822505]
+      ],
+      bearing: 10 // starting zoom
+    });
 
-// Change the cursor to a pointer when the mouse is over the places layer.
-map.on("mouseenter", "carto", function() {
-  map.getCanvas().style.cursor = "pointer";
-});
+    map.on("load", function () {
+      map.addSource("carto_data", {
+        type: "geojson",
+        data: json
+      });
 
-// Change it back to a pointer when it leaves.
-map.on("mouseleave", "carto", function() {
-  map.getCanvas().style.cursor = "";
-});
-</script>
+      if (map.loaded() && map.isSourceLoaded("carto_data")) {
+        return;
+      } else {
+        // stop the loadingDiv from rendering
+        var loadingDiv = document.getElementById("lds-hourglass");
+        loadingDiv.style.display = "none";
+        // Find the index of the first symbol layer in the map style
+        var layers = map.getStyle().layers;
+        var firstSymbolId;
+        for (var i = 0; i < layers.length; i++) {
+          if (layers[i].type === "symbol") {
+            firstSymbolId = layers[i].id;
+            break;
+          }
+        }
+
+        map.addLayer(
+          {
+            id: "carto",
+            type: "fill",
+            source: "carto_data",
+            paint: {
+              "fill-color": 'blue',
+              "fill-opacity": 0.9
+            },
+            filter: ["!=", "yearbuilt", 0]
+          },
+          firstSymbolId
+        );
+      }
+    });
+
+    map.on("click", "carto", function (e) {
+      var coordinates = e.features[0].geometry.coordinates[0][1];
+      var yearbuilt = e.features[0].properties.yearbuilt;
+      var address = e.features[0].properties.address;
+      var owner = e.features[0].properties.ownername;
+
+      new mapboxgl.Popup({
+        anchor: "right"
+      })
+        .setLngLat(coordinates)
+        .setHTML(
+          "<h3>Year built: </h3>" +
+          yearbuilt +
+          "<h3>Address: </h3>" +
+          address +
+          "<h3>Owner: </h3>" +
+          owner
+        )
+        .addTo(map);
+    });
+
+    // Change the cursor to a pointer when the mouse is over the places layer.
+    map.on("mouseenter", "carto", function () {
+      map.getCanvas().style.cursor = "pointer";
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on("mouseleave", "carto", function () {
+      map.getCanvas().style.cursor = "";
+    });
+
+    document.getElementById('slider').addEventListener('input', function (e) {
+      var year = parseInt(e.target.value);
+      map.setFilter("carto", ['==', ['number', ['get', 'yearbuilt']], year])
+      document.getElementById('active-year').innerText = year
+    })
+  </script>
 </body>
 
 
